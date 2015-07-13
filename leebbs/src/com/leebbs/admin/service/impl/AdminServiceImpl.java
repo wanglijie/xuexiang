@@ -42,12 +42,12 @@ public class AdminServiceImpl extends BaseServiceImpl<Admin, String>
 	@Transactional
 	public void save(Admin admin) {
 		super.save(admin);
-
+		
 		List<Role> roles = admin.getRoles();
 		
 		AdminRoleLink adminRoleLink = new AdminRoleLink();
 		adminRoleLink.setAdmin(admin);
-		if (roles != null) {
+		if (roles != null && !roles.isEmpty()) {
 			for (Role role : roles) {
 				adminRoleLink.setRole(role);
 				this.adminDao.saveRelativity(adminRoleLink);
@@ -57,23 +57,14 @@ public class AdminServiceImpl extends BaseServiceImpl<Admin, String>
 	
 	@Transactional
 	public void remove(String id) {
-		//先删除AdminRoleLink关联关系
-		
 		Admin admin = new Admin();
 		admin.setId(id);
-		
 		AdminRoleLink adminRoleLink = new AdminRoleLink();
 		adminRoleLink.setAdmin(admin);
+		//先删除AdminRoleLink关联关系
 		this.adminDao.removeRelativity(adminRoleLink);
 		//再删除Admin记录
 		super.remove(id);
-		
-/*		int b=12;
-		int c;
-		for (int i=2;i>=-2;i--){
-			c=b/i;
-			System.out.println("i="+i);
-		}*/
 	}
 	
 	@Transactional(readOnly=true)
@@ -93,10 +84,19 @@ public class AdminServiceImpl extends BaseServiceImpl<Admin, String>
 		return num > 0L;
 	}	
 	
+	
+	/***
+	 * 
+	 * 更新用户(包含用户角色)
+	 * 
+	 * 首先返回当前admin数据库角色列表
+	 * 其次确定新增和被删除的角色信息
+	 * 
+	 */
 	@Transactional
 	public void update(Admin admin) {
 		super.update(admin);
-		//先delete  再insert(hiberante)
+		
 		Admin adminWithRoles = this.adminDao.findAdminRoles(admin.getId());
 		//返回原来用户与角色的所有关系
 		List<Role> pageRoles = admin.getRoles();		
@@ -105,10 +105,9 @@ public class AdminServiceImpl extends BaseServiceImpl<Admin, String>
 			dbRoles = new ArrayList<Role>();
 		}
 		
+		//先delete  再insert(hiberante)
 		AdminRoleLink adminRoleLink = new AdminRoleLink();
 		Collection<Role> subtract = CollectionUtils.subtract(dbRoles, pageRoles);    
-		System.out.println("Intersection(dbRoles, pageRoles): " + ArrayUtils.toString(subtract.toArray()));   
-		
 		Iterator<Role> it = subtract.iterator();
 		while (it.hasNext()) {
 	            Role role = it.next();
@@ -118,8 +117,6 @@ public class AdminServiceImpl extends BaseServiceImpl<Admin, String>
 		}
 	     
 		subtract = CollectionUtils.subtract(pageRoles, dbRoles);  
-		System.out.println("Intersection(pageRoles, dbRoles): " + ArrayUtils.toString(subtract.toArray())); 
-	
 		it = subtract.iterator();
 		while (it.hasNext()) {
 	            Role role = it.next();

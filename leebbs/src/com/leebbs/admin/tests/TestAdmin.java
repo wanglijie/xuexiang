@@ -56,9 +56,9 @@ public class TestAdmin {
 		 System.out.println(admin.getEmail());
 	 }	 
 	 
-	
+	 
 	 public void remove() {
-		 String adminId = "7b32d72c27ed11e5aa6800ff624f02c5";
+		 String adminId = "a7048bbf294411e594ec74e5432100f2";
 		 adminService.remove(adminId);
 	 }
 	 
@@ -90,10 +90,10 @@ public class TestAdmin {
 		 }
 	 }
 	 
-	 @Test
+	@Test
 	 public void update() {
 		 Admin admin = new Admin();
-		 admin.setId("1d75c59828b211e592d100ff624f02c5");
+		 admin.setId("6f8a149f294511e594ec74e5432100f2");
 		 admin.setUsername("user100");
 		 admin.setPassword("dddddddddddd");
 		 admin.setEmail("dddd@163.com");
@@ -102,9 +102,6 @@ public class TestAdmin {
 		 Role role1 = new Role();
 		 role1.setId("a07c4a0719bb11e5bc5474e5432100f2");
 		 admin.getRoles().add(role1);
-		 Role role2 = new Role();
-		 role2.setId("b07c4a0719bb22e5bc5474e5432100f2");
-		 admin.getRoles().add(role2);
 		 
 		 adminService.update(admin);
 	 }

@@ -1,0 +1,6 @@
+/*		int b=12;
+		int c;
+		for (int i=2;i>=-2;i--){
+			c=b/i;
+			System.out.println("i="+i);
+		}*/
