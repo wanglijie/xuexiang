@@ -10,7 +10,7 @@
 	<sql id="Table_Column_List" >
 	    id, create_date, modify_date, description, is_system, name
 	</sql>
-		
+
 	<resultMap id="RoleMap" type="Role" >
 	    <id property="id" column="id"  jdbcType="VARCHAR" />
 	    <result property="createDate" column="create_date"  jdbcType="TIMESTAMP" javaType="java.util.Date"/>
@@ -19,6 +19,7 @@
 	    <result property="isSystem" column="is_system"  jdbcType="BIT" />
 	    <result property="name" column="name"  jdbcType="VARCHAR" />
 	</resultMap>
+
 	
 	<resultMap id="RoleAdminMap" type="Role" extends="RoleMap">  
 		<collection property="admins" ofType="Admin" columnPrefix="admin_">
@@ -30,7 +31,13 @@
 		    <result property="email" column="email"  jdbcType="VARCHAR"  />
 		</collection>	
 	</resultMap>
-	
+
+			
+	<resultMap id="RoleAuthorityMap" type="RoleAuthority" >
+	    <result property="roleId" column="role_id"  jdbcType="VARCHAR" />
+	    <result property="authorities" column="authorities"  jdbcType="VARCHAR" />
+	</resultMap>
+		
 	<insert id="save" parameterType="Role" >
 	  	<selectKey keyProperty="id" resultType="String" order="BEFORE">
 				select replace(uuid(),'-','')
@@ -67,7 +74,7 @@
 	
 	<update id="update" parameterType="Role" >
 	    update <include refid="Table_Name" />
-	    set modify_date = #{modifyDate,jdbcType=TIMESTAMP},
+	    set modify_date = now(),
 	      	description = #{description,jdbcType=VARCHAR},
 	      	is_system = #{isSystem,jdbcType=BIT},
 	      	name = #{name,jdbcType=VARCHAR}
@@ -88,7 +95,7 @@
 		<trim prefix="where" prefixOverrides="and|or">
 			<!-- 非空ognl有相应方法 -->
 			<if test="search.name != null and search.name != ''">  
-            	username like  "%"#{search.name}"%"
+            	name like  "%"#{search.name}"%"
        	 	</if>  
 		</trim>
 	</select>
@@ -113,10 +120,46 @@
             	B.id = #{id}
        	 	</if>  
        	 	<if test="name != null and name != ''">  
-	                or B.name = #{name}  
+	             or B.name = #{name}  
 	         </if>  
 		</trim> 
     </select>   	
+
+
+     <select id="findRoleAuthorities" resultMap="RoleAuthorityMap" 
+     		parameterType="Role">
+     		select 
+     			*
+     		from role_authority
+        <trim prefix="where" prefixOverrides="and|or">
+			<!-- 非空ognl有相应方法 -->
+			<if test="id != null and id != ''">  
+            	role_id = #{id}
+       	 	</if>   
+		</trim>      		
+	 </select>
+	 
+	     <!-- 向admin_role保存用户和角色关系  -->
+	<insert id="saveRoleAuthorities" parameterType="RoleAuthority">  
+        insert into role_authority(role_id, authorities)  
+        values(
+        		#{roleId,jdbcType=VARCHAR},
+        		#{authorities,jdbcType=VARCHAR})  
+    </insert>  
     
+    <!-- 删除admin时，同时将关联表admin_role对应的记录 -->
+    <delete id="deleteRoleAuthorities" parameterType="RoleAuthority">
+    	delete from role_authority
+		<trim prefix="where" prefixOverrides="and">
+			<!-- 非空ognl有相应方法 -->
+			<if test="roleId != null and roleId  != ''">  
+            	role_id = #{roleId,jdbcType=VARCHAR}
+       	 	</if>  
+			<if test="authorities != null and authorities != ''">  
+            	and authorities = #{authorities,jdbcType=VARCHAR}
+       	 	</if> 
+		</trim>
+		
+    </delete>
     
 </mapper>

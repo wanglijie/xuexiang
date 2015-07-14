@@ -16,6 +16,7 @@ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
     <typeAliases>
          <typeAlias alias="Admin" 	 type="com.leebbs.admin.entity.Admin"/>
          <typeAlias alias="Role" 	 type="com.leebbs.admin.entity.Role"/>
+         <typeAlias alias="RoleAuthority" type="com.leebbs.admin.entity.RoleAuthority"/>
          <typeAlias alias="AdminRoleLink" type="com.leebbs.admin.entity.AdminRoleLink"/>
          <typeAlias alias="Pageable" type="com.leebbs.core.utils.Pageable"/>
     </typeAliases>
