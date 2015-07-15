@@ -10,12 +10,15 @@ import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;  
 import org.apache.commons.lang.ArrayUtils;   
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.subject.Subject;
 
 import javax.annotation.Resource;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.leebbs.Principal;
 import com.leebbs.admin.dao.AdminDao;
 import com.leebbs.admin.entity.Admin;
 import com.leebbs.admin.entity.AdminRoleLink;
@@ -42,12 +45,10 @@ public class AdminServiceImpl extends BaseServiceImpl<Admin, String>
 	@Transactional
 	public void save(Admin admin) {
 		super.save(admin);
-		
 		List<Role> roles = admin.getRoles();
-		
-		AdminRoleLink adminRoleLink = new AdminRoleLink();
-		adminRoleLink.setAdmin(admin);
 		if (roles != null && !roles.isEmpty()) {
+			AdminRoleLink adminRoleLink = new AdminRoleLink();
+			adminRoleLink.setAdmin(admin);
 			for (Role role : roles) {
 				adminRoleLink.setRole(role);
 				this.adminDao.saveRelativity(adminRoleLink);
@@ -65,6 +66,11 @@ public class AdminServiceImpl extends BaseServiceImpl<Admin, String>
 		this.adminDao.removeRelativity(adminRoleLink);
 		//再删除Admin记录
 		super.remove(id);
+	}
+
+	@Transactional
+	public void remove(String... ids) {
+		super.remove(ids);
 	}
 	
 	@Transactional(readOnly=true)
@@ -84,17 +90,16 @@ public class AdminServiceImpl extends BaseServiceImpl<Admin, String>
 		return num > 0L;
 	}	
 	
-	
-	/***
-	 * 
-	 * 更新用户(包含用户角色)
-	 * 
-	 * 首先返回当前admin数据库角色列表
-	 * 其次确定新增和被删除的角色信息
-	 * 
-	 */
 	@Transactional
 	public void update(Admin admin) {
+		/***
+		 * 
+		 * 更新用户(包含用户角色)
+		 * 
+		 * 首先返回当前admin数据库角色列表
+		 * 其次确定新增和被删除的角色信息
+		 * 
+		 */		
 		super.update(admin);
 		
 		Admin adminWithRoles = this.adminDao.findAdminRoles(admin.getId());
@@ -105,7 +110,7 @@ public class AdminServiceImpl extends BaseServiceImpl<Admin, String>
 			dbRoles = new ArrayList<Role>();
 		}
 		
-		//先delete  再insert(hiberante)
+		//先delete  再insert
 		AdminRoleLink adminRoleLink = new AdminRoleLink();
 		Collection<Role> subtract = CollectionUtils.subtract(dbRoles, pageRoles);    
 		Iterator<Role> it = subtract.iterator();
@@ -125,5 +130,48 @@ public class AdminServiceImpl extends BaseServiceImpl<Admin, String>
 				this.adminDao.saveRelativity(adminRoleLink);
 		}
 	
+	}
+
+	@Transactional(readOnly=true)
+	public List<String> findAuthorities(String id) {
+		return this.adminDao.findAuthorities(id);
+	}
+
+	@Transactional(readOnly=true)
+	public boolean isAuthenticated() {
+		Subject subject = SecurityUtils.getSubject();
+		if (subject != null) {
+			return subject.isAuthenticated();
+		}
+		return false;
+	}
+
+	@Transactional(readOnly=true)
+	public Admin getCurrent() {
+		Subject subject = SecurityUtils.getSubject();
+		if (subject != null) {
+			Principal principal = (Principal) subject.getPrincipal();
+			if (principal != null) {
+				return (Admin) this.adminDao.find(principal.getId());
+			}
+		}
+		return null;
+	}
+
+	@Transactional(readOnly=true)
+	public String getCurrentUsername() {
+		Subject subject = SecurityUtils.getSubject();
+		if (subject != null) {
+			Principal principal = (Principal) subject.getPrincipal();
+			if (principal != null) {
+				return principal.getUsername();
+			}
+		}
+		return null;
+	}
+
+	@Override
+	public Admin findByUsername(String username) {
+		return this.findByUsername(username);
 	}
 }

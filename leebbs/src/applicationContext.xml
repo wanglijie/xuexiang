@@ -94,5 +94,11 @@
 		<property name="defaultLocale" value="${locale}" />
 	</bean>
 		
-
+	<bean id="imageCaptchaService" class="com.octo.captcha.service.image.DefaultManageableImageCaptchaService">
+		<property name="captchaEngine">
+			<bean class="com.leebbs.core.utils.CaptchaEngine" />
+		</property>
+		<property name="minGuarantedStorageDelayInSeconds" value="3600" />
+	</bean>
+	
 </beans>

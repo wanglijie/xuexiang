@@ -13,6 +13,7 @@ import com.leebbs.core.utils.Pageable;
 
 
 public interface AdminDao extends BaseDao<Admin, String>{
+	
 	/**
 	 * 按分页条件和查询参数对返回结果进行分页
 	 * 
@@ -40,6 +41,7 @@ public interface AdminDao extends BaseDao<Admin, String>{
 	
 	/***
 	 * 由admin主键ID删除AdminRole关联关系
+	 * 
 	 * @param id
 	 */
 	public abstract void removeRelativity(AdminRoleLink adminRoleLink);
@@ -62,4 +64,20 @@ public interface AdminDao extends BaseDao<Admin, String>{
 	 */
 	public abstract Admin findAdminRoles(String id);
 	
+	/***
+	 * 返回管理员所有Authorities
+	 * 
+	 * @param id 管理员id
+	 * 
+	 * @return Authorities列表
+	 */
+	public List<String> findAuthorities(String id);
+
+	/**
+	 * 根据用户名返回 Admin
+	 * 
+	 * @param username
+	 * @return
+	 */
+	public abstract Admin findByUsername(String username);
 }

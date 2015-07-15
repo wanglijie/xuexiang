@@ -17,9 +17,18 @@ import com.leebbs.core.utils.Pageable;
 public abstract interface AdminService extends BaseService<Admin, String> {
 	
 	public abstract boolean usernameExists(String username); 
+
+	public abstract Admin findByUsername(String username);
 	
 	public abstract Page<Admin> findPage(Pageable pageable, SearchAdmin searchAdmin);
 	
+	public abstract List<String> findAuthorities(String id);
+	
+	public abstract boolean isAuthenticated();
+
+	public abstract Admin getCurrent();
+
+	public abstract String getCurrentUsername();
 	
 }
 
